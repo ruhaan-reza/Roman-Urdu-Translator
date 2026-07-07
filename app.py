@@ -1,9 +1,8 @@
 import streamlit as st
 import os
-import sys
 
-# 1. Correct the import to pull the 'main' function from your main.py file
-from main import main 
+# Import the core logic directly, bypassing the command-line reader
+from main import run_pipeline 
 
 st.set_page_config(page_title="Layout Preserving Translator", layout="centered")
 st.title("📚 Layout-Preserving Roman Urdu Translator")
@@ -20,29 +19,30 @@ if st.button("🚀 Start Precision Translation", type="primary"):
         temp_input = "temp_input.pdf"
         temp_output = "layout_preserved_output.pdf"
         
+        # Save the uploaded file into a temporary layout space
         with open(temp_input, "wb") as f:
             f.write(uploaded_file.getbuffer())
             
         try:
-            st.info("⚡ Initializing pipeline modules (OCR -> Inpaint -> Render)...")
+            st.info("⚡ Pipeline Active. Running Engine (OCR -> Inpaint -> Render)...")
             
-            # 2. Trick the command-line argument parser into thinking it's running via terminal
-            # This satisfies the argparse requirements shown in your main.py screenshot!
-            backend_choice = "anthropic" if api_key else "echo" 
+            # Choose backend based on the API key presence
+            backend_choice = "openai" if api_key else "echo"
             
-            sys.argv = [
-                "main.py", 
-                "--input", temp_input, 
-                "--output", temp_output, 
-                "--backend", backend_choice
-            ]
-            if api_key:
-                sys.argv.extend(["--api-key", api_key])
+            # Execute the core engineering pipeline directly using your variables!
+            run_pipeline(
+                input_pdf=temp_input,
+                output_pdf=temp_output,
+                dpi=150,                     # 150 DPI saves precious RAM on Streamlit Cloud
+                backend=backend_choice,
+                api_key=api_key if api_key else None,
+                model=None,
+                erase_mode="fill",           # 'fill' is lightning fast and robust for web apps
+                min_confidence=40,
+                align="left"
+            )
             
-            # 3. Call the execution function
-            main()
-            
-            # 4. Provide the final PDF download button
+            # Verify and construct the dynamic download button
             if os.path.exists(temp_output):
                 with open(temp_output, "rb") as file_bytes:
                     st.download_button(
@@ -51,15 +51,16 @@ if st.button("🚀 Start Precision Translation", type="primary"):
                         file_name="Roman_Urdu_Layout_Preserved.pdf",
                         mime="application/pdf"
                     )
-                st.success("🎉 Done! Layout preserved perfectly.")
+                st.success("🎉 Process Complete! Click above to download.")
             else:
-                st.error("Pipeline finished but no output file was generated.")
+                st.error("Engine completed but no output canvas was saved.")
                 
         except Exception as e:
-            st.error(f"Pipeline Error: {e}")
+            st.error(f"Pipeline Execution Fault: {e}")
             
         finally:
-            # Cleanup files on the server
+            # Clean up residual file streams from the server
             if os.path.exists(temp_input): os.remove(temp_input)
             if os.path.exists(temp_output): os.remove(temp_output)
+
 
