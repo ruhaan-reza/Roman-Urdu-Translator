@@ -1,0 +1,10 @@
+# Core pipeline
+PyMuPDF>=1.24.0        # PDF -> image rasterization and final PDF assembly (fitz)
+pytesseract>=0.3.10    # Python wrapper for the Tesseract OCR engine
+opencv-python>=4.9.0   # Inpainting (cv2.inpaint) for the "inpaint" erase mode
+numpy>=1.26.0
+Pillow>=10.2.0
+
+# Translation backends (install only the one(s) you plan to use)
+anthropic>=0.34.0      # for --backend anthropic
+openai>=1.30.0         # for --backend openai
